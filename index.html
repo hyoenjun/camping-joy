@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Camping&Joy</title>
+<style>
+  :root {
+    --primary: #2d6a4f;
+    --primary-light: #40916c;
+    --primary-dark: #1b4332;
+    --accent: #d4a373;
+    --accent-light: #e9c46a;
+    --bg: #fefae0;
+    --card: #ffffff;
+    --text: #333333;
+    --text-light: #666666;
+    --border: #ddd;
+    --danger: #e63946;
+    --success: #2a9d8f;
+    --info: #457b9d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  header h1 { font-size: 1.5rem; }
+  header .subtitle { font-size: 0.85rem; opacity: 0.8; margin-top: 4px; }
+
+  .header-actions { display: flex; gap: 10px; }
+  .header-actions button {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  .header-actions button:hover { background: rgba(255,255,255,0.25); }
+
+  nav {
+    background: var(--primary-light);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    padding: 14px 24px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  nav button:hover { color: white; background: rgba(255,255,255,0.1); }
+  nav button.active {
+    color: white;
+    border-bottom-color: var(--accent);
+    background: rgba(255,255,255,0.1);
+    font-weight: 600;
+  }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .card h2 {
+    font-size: 1.2rem;
+    color: var(--primary-dark);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    color: var(--primary);
+    margin: 16px 0 10px;
+  }
+
+  .btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { opacity: 0.85; }
+  .btn-info { background: var(--info); color: white; }
+  .btn-info:hover { opacity: 0.85; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { background: #f5f5f5; }
+  .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+
+  input, select, textarea {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+
+  .form-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 0.8rem; color: var(--text-light); font-weight: 500; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: var(--primary-dark);
+    position: sticky;
+    top: 0;
+  }
+
+  tr:hover { background: #fafafa; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .badge-leader { background: #ffd60a; color: #333; }
+  .badge-member { background: #e0e0e0; color: #555; }
+  .badge-attending { background: #d4edda; color: #155724; }
+  .badge-absent { background: #f8d7da; color: #721c24; }
+
+  .equipment-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .equip-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #e8f5e9;
+    color: var(--primary-dark);
+    border-radius: 10px;
+    font-size: 0.75rem;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .form-row { flex-direction: column; }
+    nav button { padding: 12px 16px; font-size: 0.8rem; }
+  }
+
+  .tarp-zone {
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .tarp-zone h4 {
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+
+  .member-chip {
+    display: inline-block;
+    padding: 4px 10px;
+    margin: 3px;
+    background: #f0f0f0;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    cursor: grab;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .member-chip:hover { background: #e0e0e0; transform: scale(1.03); }
+  .member-chip.leader { background: #fff3cd; border: 1px solid #ffc107; }
+
+  .drop-zone {
+    min-height: 60px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-content: flex-start;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .drop-zone.drag-over {
+    border-color: var(--primary);
+    background: rgba(45, 106, 79, 0.05);
+  }
+
+  .summary-stat {
+    text-align: center;
+    padding: 16px;
+  }
+
+  .summary-stat .number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .summary-stat .label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .checklist-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+  }
+
+  .meal-card {
+    background: linear-gradient(135deg, #fff9e6, #fff);
+    border: 1px solid #f0e0b0;
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .meal-card h4 { color: #b8860b; margin-bottom: 8px; }
+  .meal-card .menu { color: var(--text); font-size: 0.9rem; line-height: 1.6; }
+
+  .auto-assign-btn {
+    background: linear-gradient(135deg, var(--accent), #c68a5a);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.15s;
+  }
+
+  .auto-assign-btn:hover { transform: scale(1.02); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 12px;
+    padding: 28px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 { margin-bottom: 20px; }
+  .modal .form-group { margin-bottom: 14px; }
+
+  .equip-checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .equip-checklist label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .equip-checklist label:hover { background: #f5f5f5; }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary-dark);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    z-index: 200;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  .print-area { display: none; }
+
+  @media print {
+    body > *:not(.print-area) { display: none !important; }
+    .print-area { display: block !important; }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-light);
+  }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Camping&Joy</h1>
+    <div class="subtitle">캠핑 모임 장비/인원 배정 관리</div>
+  </div>
+  <div class="header-actions">
+    <button onclick="exportData()">내보내기</button>
+    <button onclick="importDataPrompt()">불러오기</button>
+    <button onclick="printAssignment()">인쇄</button>
+  </div>
+</header>
+
+<nav id="nav">
+  <button class="active" data-tab="dashboard">대시보드</button>
+  <button data-tab="members">회원 관리</button>
+  <button data-tab="equipment">장비 현황</button>
+  <button data-tab="assign">배정표</button>
+  <button data-tab="meals">식사/일정</button>
+</nav>
+
+<main>
+  <!-- 대시보드 -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="grid-3" id="stats-cards"></div>
+    <div class="grid-2">
+      <div class="card">
+        <h2>장비 부족 현황</h2>
+        <div id="shortage-list"></div>
+      </div>
+      <div class="card">
+        <h2>참석자 빠른 보기</h2>
+        <div id="attending-quick"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 회원 관리 -->
+  <div id="tab-members" class="tab-content">
+    <div class="card">
+      <h2>회원 목록</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>이름</label>
+          <input type="text" id="memberName" placeholder="이름">
+        </div>
+        <div class="form-group">
+          <label>구분 (동명이인용)</label>
+          <input type="text" id="memberTag" placeholder="예: 김, 정, 유">
+        </div>
+        <div class="form-group">
+          <label>역할</label>
+          <select id="memberRole">
+            <option value="member">회원</option>
+            <option value="leader">운영진</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>성별</label>
+          <select id="memberGender">
+            <option value="male">남</option>
+            <option value="female">여</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="addMember()">추가</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>이름</th>
+            <th>역할</th>
+            <th>성별</th>
+            <th>참석</th>
+            <th>보유 장비</th>
+            <th>아침 필요</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody id="memberTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 장비 현황 -->
+  <div id="tab-equipment" class="tab-content">
+    <div class="card">
+      <h2>장비 종류 관리</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>장비명</label>
+          <input type="text" id="equipName" placeholder="예: 테이블, 그리들">
+        </div>
+        <div class="form-group">
+          <label>필요 수량 기준</label>
+          <select id="equipCalc">
+            <option value="per4">4인당 1개</option>
+            <option value="per6">6인당 1개</option>
+            <option value="per1">1인당 1개</option>
+            <option value="fixed">고정 수량</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>고정 수량 (고정시)</label>
+          <input type="number" id="equipFixed" value="1" min="1" style="width:80px">
+        </div>
+        <button class="btn btn-primary" onclick="addEquipType()">추가</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>장비</th>
+            <th>필요 수량</th>
+            <th>보유 수량</th>
+            <th>상태</th>
+            <th>보유자</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody id="equipTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 배정표 -->
+  <div id="tab-assign" class="tab-content">
+    <div class="card" style="text-align:center; margin-bottom: 20px;">
+      <button class="auto-assign-btn" onclick="autoAssign()">자동 배정 실행</button>
+      <p style="margin-top:8px; font-size:0.85rem; color:var(--text-light)">
+        참석자 기준으로 테이블, 텐트, 장비를 자동 배분합니다. 이후 드래그로 수정 가능.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>메인 타프 테이블 배정</h2>
+      <div id="tarpLeaders" style="text-align:center; margin-bottom:16px; font-size:0.9rem; color:var(--text-light)"></div>
+      <div class="grid-3" id="tarpTables"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>텐트 배정</h2>
+        <div id="tentAssign"></div>
+      </div>
+      <div class="card">
+        <h2>장비 담당자 배정</h2>
+        <div id="equipAssign"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>역할 분담</h2>
+      <div class="grid-2">
+        <div>
+          <h3>피칭 (설치)</h3>
+          <div id="pitchingList"></div>
+        </div>
+        <div>
+          <h3>정리/설거지</h3>
+          <div id="cleanupList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 식사/일정 -->
+  <div id="tab-meals" class="tab-content">
+    <div class="card">
+      <h2>일정 관리</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>시간</label>
+          <input type="text" id="schedTime" placeholder="12:00~13:30">
+        </div>
+        <div class="form-group">
+          <label>항목</label>
+          <input type="text" id="schedItem" placeholder="점심식사">
+        </div>
+        <div class="form-group">
+          <label>메뉴/내용</label>
+          <input type="text" id="schedMenu" placeholder="비빔면+김치볶음밥" style="width:300px">
+        </div>
+        <button class="btn btn-primary" onclick="addSchedule()">추가</button>
+      </div>
+      <div id="scheduleList"></div>
+    </div>
+
+    <div class="card">
+      <h2>아침 식사 필요 인원</h2>
+      <div id="breakfastList"></div>
+    </div>
+  </div>
+</main>
+
+<!-- 회원 장비 편집 모달 -->
+<div class="modal-overlay" id="equipModal">
+  <div class="modal">
+    <h2 id="equipModalTitle">장비 편집</h2>
+    <div class="equip-checklist" id="equipChecklist"></div>
+    <div style="display:flex; gap:10px; margin-top:20px; justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveEquipment()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="print-area" id="printArea"></div>
+
+<script>
+const STORAGE_KEY = 'campingPlanner';
+
+let state = loadState();
+
+function defaultState() {
+  return {
+    members: [],
+    equipTypes: [
+      { id: 'tent', name: '텐트', calc: 'per4', fixed: 1 },
+      { id: 'tarp', name: '타프', calc: 'fixed', fixed: 3 },
+      { id: 'table', name: '테이블', calc: 'per4', fixed: 1 },
+      { id: 'grill', name: '그리들', calc: 'per6', fixed: 1 },
+      { id: 'burner', name: '강염버너', calc: 'per6', fixed: 1 },
+      { id: 'icebox', name: '아이스박스', calc: 'per6', fixed: 1 },
+      { id: 'lantern', name: '조명', calc: 'per1', fixed: 1 },
+      { id: 'scissors', name: '가위/집게', calc: 'per4', fixed: 1 },
+      { id: 'cuttingboard', name: '도마/칼', calc: 'per6', fixed: 1 },
+      { id: 'bigpot', name: '대형냄비', calc: 'fixed', fixed: 2 },
+      { id: 'reel', name: '릴선', calc: 'per6', fixed: 1 },
+      { id: 'chair', name: '의자', calc: 'per1', fixed: 1 },
+      { id: 'sleeping', name: '침낭/매트', calc: 'per1', fixed: 1 },
+    ],
+    assignments: { tables: [[], [], []], tents: { male: [], female: [] }, equipDuty: {} },
+    schedule: [
+      { time: '~12:00', item: '집합', menu: '캠핑장 도착, 지각자 벌금!' },
+      { time: '12:00~13:30', item: '피칭/식사준비', menu: '남자-피칭 / 여자-식사준비' },
+      { time: '13:30', item: '점심식사', menu: '' },
+      { time: '오후', item: '자유시간', menu: '물놀이, 보드게임, 수다' },
+      { time: '저녁', item: '저녁식사', menu: '' },
+      { time: '밤', item: '야식', menu: '' },
+      { time: '아침', item: '아침식사', menu: '' },
+    ],
+  };
+}
+
+function loadState() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY);
+    return d ? JSON.parse(d) : defaultState();
+  } catch { return defaultState(); }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function displayName(m) {
+  return m.tag ? `${m.name}(${m.tag})` : m.name;
+}
+
+// Tabs
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    renderAll();
+  });
+});
+
+// Members
+function addMember() {
+  const name = document.getElementById('memberName').value.trim();
+  if (!name) return;
+  const tag = document.getElementById('memberTag').value.trim();
+  const role = document.getElementById('memberRole').value;
+  const gender = document.getElementById('memberGender').value;
+  state.members.push({
+    id: genId(), name, tag, role, gender,
+    attending: true, equipment: [], needBreakfast: false
+  });
+  document.getElementById('memberName').value = '';
+  document.getElementById('memberTag').value = '';
+  saveState();
+  renderMembers();
+  showToast(`${name} 추가됨`);
+}
+
+function removeMember(id) {
+  state.members = state.members.filter(m => m.id !== id);
+  saveState();
+  renderMembers();
+}
+
+function toggleAttending(id) {
+  const m = state.members.find(m => m.id === id);
+  if (m) { m.attending = !m.attending; saveState(); renderMembers(); }
+}
+
+function toggleBreakfast(id) {
+  const m = state.members.find(m => m.id === id);
+  if (m) { m.needBreakfast = !m.needBreakfast; saveState(); renderMembers(); }
+}
+
+let editingMemberId = null;
+
+function openEquipModal(id) {
+  editingMemberId = id;
+  const m = state.members.find(m => m.id === id);
+  document.getElementById('equipModalTitle').textContent = `${displayName(m)} - 보유 장비`;
+  const cl = document.getElementById('equipChecklist');
+  cl.innerHTML = state.equipTypes.map(e => `
+    <label>
+      <input type="checkbox" value="${e.id}" ${m.equipment.includes(e.id) ? 'checked' : ''}>
+      ${e.name}
+    </label>
+  `).join('');
+  document.getElementById('equipModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('equipModal').classList.remove('show');
+}
+
+function saveEquipment() {
+  const m = state.members.find(m => m.id === editingMemberId);
+  if (!m) return;
+  const checks = document.querySelectorAll('#equipChecklist input:checked');
+  m.equipment = Array.from(checks).map(c => c.value);
+  saveState();
+  closeModal();
+  renderMembers();
+  showToast('장비 저장됨');
+}
+
+function renderMembers() {
+  const tb = document.getElementById('memberTable');
+  tb.innerHTML = state.members.map(m => `
+    <tr>
+      <td><strong>${displayName(m)}</strong></td>
+      <td><span class="badge ${m.role === 'leader' ? 'badge-leader' : 'badge-member'}">
+        ${m.role === 'leader' ? '운영진' : '회원'}</span></td>
+      <td>${m.gender === 'male' ? '남' : '여'}</td>
+      <td>
+        <span class="badge ${m.attending ? 'badge-attending' : 'badge-absent'}"
+              style="cursor:pointer" onclick="toggleAttending('${m.id}')">
+          ${m.attending ? '참석' : '불참'}
+        </span>
+      </td>
+      <td>
+        <div class="equipment-tags">
+          ${m.equipment.map(eId => {
+            const et = state.equipTypes.find(e => e.id === eId);
+            return et ? `<span class="equip-tag">${et.name}</span>` : '';
+          }).join('')}
+          <button class="btn btn-sm btn-outline" onclick="openEquipModal('${m.id}')">편집</button>
+        </div>
+      </td>
+      <td>
+        <input type="checkbox" ${m.needBreakfast ? 'checked' : ''}
+               onchange="toggleBreakfast('${m.id}')" style="width:18px;height:18px;accent-color:var(--primary)">
+      </td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="removeMember('${m.id}')">삭제</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// Equipment types
+function addEquipType() {
+  const name = document.getElementById('equipName').value.trim();
+  if (!name) return;
+  const calc = document.getElementById('equipCalc').value;
+  const fixed = parseInt(document.getElementById('equipFixed').value) || 1;
+  state.equipTypes.push({ id: genId(), name, calc, fixed });
+  document.getElementById('equipName').value = '';
+  saveState();
+  renderEquipment();
+  showToast(`${name} 장비 추가됨`);
+}
+
+function removeEquipType(id) {
+  state.equipTypes = state.equipTypes.filter(e => e.id !== id);
+  state.members.forEach(m => m.equipment = m.equipment.filter(e => e !== id));
+  saveState();
+  renderEquipment();
+}
+
+function calcNeeded(equip) {
+  const attending = state.members.filter(m => m.attending).length;
+  switch (equip.calc) {
+    case 'per1': return attending;
+    case 'per4': return Math.ceil(attending / 4);
+    case 'per6': return Math.ceil(attending / 6);
+    case 'fixed': return equip.fixed;
+    default: return 1;
+  }
+}
+
+function calcOwned(equipId) {
+  return state.members.filter(m => m.attending && m.equipment.includes(equipId)).length;
+}
+
+function renderEquipment() {
+  const tb = document.getElementById('equipTable');
+  tb.innerHTML = state.equipTypes.map(e => {
+    const needed = calcNeeded(e);
+    const owned = calcOwned(e.id);
+    const ok = owned >= needed;
+    const owners = state.members.filter(m => m.attending && m.equipment.includes(e.id));
+    const calcLabel = { per1: '1인당 1개', per4: '4인당 1개', per6: '6인당 1개', fixed: `고정 ${e.fixed}개` };
+    return `
+      <tr>
+        <td><strong>${e.name}</strong><br><span style="font-size:0.75rem;color:#999">${calcLabel[e.calc]}</span></td>
+        <td>${needed}개</td>
+        <td>${owned}개</td>
+        <td style="color:${ok ? 'var(--success)' : 'var(--danger)'}; font-weight:600">
+          ${ok ? 'OK' : `${needed - owned}개 부족`}
+        </td>
+        <td>
+          <div class="equipment-tags">
+            ${owners.map(m => `<span class="equip-tag">${displayName(m)}</span>`).join('')}
+          </div>
+        </td>
+        <td><button class="btn btn-sm btn-danger" onclick="removeEquipType('${e.id}')">삭제</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Auto Assign
+function autoAssign() {
+  const attending = state.members.filter(m => m.attending);
+  const leaders = attending.filter(m => m.role === 'leader');
+  const males = attending.filter(m => m.gender === 'male');
+  const females = attending.filter(m => m.gender === 'female');
+
+  // Table assignment: distribute evenly across 3 tables
+  const tables = [[], [], []];
+  const shuffled = [...attending].sort(() => Math.random() - 0.5);
+  shuffled.forEach((m, i) => tables[i % 3].push(m.id));
+  state.assignments.tables = tables;
+
+  // Tent assignment by gender
+  state.assignments.tents = {
+    male: males.map(m => m.id),
+    female: females.map(m => m.id)
+  };
+
+  // Equipment duty: assign equipment to owners
+  const equipDuty = {};
+  state.equipTypes.forEach(e => {
+    const owners = attending.filter(m => m.equipment.includes(e.id));
+    equipDuty[e.id] = owners.map(m => m.id);
+  });
+  state.assignments.equipDuty = equipDuty;
+
+  saveState();
+  renderAssignments();
+  showToast('자동 배정 완료!');
+}
+
+function renderAssignments() {
+  const attending = state.members.filter(m => m.attending);
+  const leaders = attending.filter(m => m.role === 'leader');
+
+  // Tarp leaders
+  document.getElementById('tarpLeaders').innerHTML =
+    `메인 타프 운영진: ${leaders.map(m => `<strong>${displayName(m)}</strong>`).join(', ') || '(운영진 없음)'}`;
+
+  // Tables
+  const tablesDiv = document.getElementById('tarpTables');
+  tablesDiv.innerHTML = state.assignments.tables.map((tIds, i) => {
+    const members = tIds.map(id => state.members.find(m => m.id === id)).filter(Boolean);
+    return `
+      <div class="tarp-zone">
+        <h4>테이블 ${i + 1}</h4>
+        <div class="drop-zone" data-table="${i}"
+             ondragover="event.preventDefault(); this.classList.add('drag-over')"
+             ondragleave="this.classList.remove('drag-over')"
+             ondrop="dropMember(event, 'table', ${i})">
+          ${members.map(m => `
+            <span class="member-chip ${m.role === 'leader' ? 'leader' : ''}"
+                  draggable="true"
+                  ondragstart="event.dataTransfer.setData('text', '${m.id}')">
+              ${displayName(m)}
+            </span>
+          `).join('')}
+        </div>
+        <div style="margin-top:6px; font-size:0.8rem; color:#999">${members.length}명</div>
+      </div>
+    `;
+  }).join('');
+
+  // Tents
+  const tentDiv = document.getElementById('tentAssign');
+  const tents = state.assignments.tents || { male: [], female: [] };
+  tentDiv.innerHTML = ['male', 'female'].map(g => {
+    const mems = (tents[g] || []).map(id => state.members.find(m => m.id === id)).filter(Boolean);
+    return `
+      <h3>${g === 'male' ? '남자 텐트' : '여자 텐트'}</h3>
+      <div class="drop-zone" data-tent="${g}"
+           ondragover="event.preventDefault(); this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="dropMember(event, 'tent', '${g}')">
+        ${mems.map(m => `
+          <span class="member-chip" draggable="true"
+                ondragstart="event.dataTransfer.setData('text', '${m.id}')">
+            ${displayName(m)}
+          </span>
+        `).join('')}
+      </div>
+      <div style="font-size:0.8rem; color:#999; margin: 4px 0 12px">${mems.length}명</div>
+    `;
+  }).join('');
+
+  // Equipment duty
+  const equipDiv = document.getElementById('equipAssign');
+  const duty = state.assignments.equipDuty || {};
+  equipDiv.innerHTML = state.equipTypes
+    .filter(e => e.calc !== 'per1')
+    .map(e => {
+      const owners = (duty[e.id] || []).map(id => state.members.find(m => m.id === id)).filter(Boolean);
+      return `
+        <div style="margin-bottom:10px">
+          <strong>${e.name}</strong> (${owners.length}개)
+          <div class="equipment-tags" style="margin-top:4px">
+            ${owners.map(m => `<span class="equip-tag">${displayName(m)}</span>`).join('') || '<span style="color:#999;font-size:0.8rem">배정 없음</span>'}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  // Pitching / Cleanup
+  const males = attending.filter(m => m.gender === 'male');
+  const females = attending.filter(m => m.gender === 'female');
+  const nonLeaderMales = males.filter(m => m.role !== 'leader');
+
+  document.getElementById('pitchingList').innerHTML =
+    `<p style="font-size:0.85rem; color:var(--text-light); margin-bottom:8px">장비 보유자 + 남성 회원</p>` +
+    males.map(m => `<span class="member-chip">${displayName(m)}</span>`).join('');
+
+  document.getElementById('cleanupList').innerHTML =
+    `<p style="font-size:0.85rem; color:var(--text-light); margin-bottom:8px">아침 - 여성 / 메인장비 - 남성</p>` +
+    `<h4 style="margin:8px 0 4px; font-size:0.85rem">설거지/정리 (여성):</h4>` +
+    females.map(m => `<span class="member-chip">${displayName(m)}</span>`).join('') +
+    `<h4 style="margin:12px 0 4px; font-size:0.85rem">메인 장비 정리 (남성):</h4>` +
+    nonLeaderMales.map(m => `<span class="member-chip">${displayName(m)}</span>`).join('');
+}
+
+function dropMember(event, type, index) {
+  event.preventDefault();
+  event.target.closest('.drop-zone').classList.remove('drag-over');
+  const memberId = event.dataTransfer.getData('text');
+
+  if (type === 'table') {
+    state.assignments.tables.forEach(t => {
+      const idx = t.indexOf(memberId);
+      if (idx > -1) t.splice(idx, 1);
+    });
+    state.assignments.tables[index].push(memberId);
+  } else if (type === 'tent') {
+    ['male', 'female'].forEach(g => {
+      const arr = state.assignments.tents[g];
+      const idx = arr.indexOf(memberId);
+      if (idx > -1) arr.splice(idx, 1);
+    });
+    state.assignments.tents[index].push(memberId);
+  }
+
+  saveState();
+  renderAssignments();
+}
+
+// Schedule
+function addSchedule() {
+  const time = document.getElementById('schedTime').value.trim();
+  const item = document.getElementById('schedItem').value.trim();
+  const menu = document.getElementById('schedMenu').value.trim();
+  if (!item) return;
+  state.schedule.push({ time, item, menu });
+  document.getElementById('schedTime').value = '';
+  document.getElementById('schedItem').value = '';
+  document.getElementById('schedMenu').value = '';
+  saveState();
+  renderSchedule();
+}
+
+function removeSchedule(i) {
+  state.schedule.splice(i, 1);
+  saveState();
+  renderSchedule();
+}
+
+function renderSchedule() {
+  const div = document.getElementById('scheduleList');
+  div.innerHTML = state.schedule.map((s, i) => `
+    <div class="meal-card" style="margin-bottom:10px">
+      <div style="display:flex; justify-content:space-between; align-items:start">
+        <div>
+          <h4>${s.time ? s.time + ' ' : ''}${s.item}</h4>
+          ${s.menu ? `<div class="menu">${s.menu}</div>` : ''}
+        </div>
+        <button class="btn btn-sm btn-outline" onclick="removeSchedule(${i})">X</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Breakfast
+  const bf = state.members.filter(m => m.attending && m.needBreakfast);
+  document.getElementById('breakfastList').innerHTML = bf.length
+    ? `<p style="margin-bottom:8px">${bf.length}명 필요:</p>` +
+      bf.map(m => `<span class="member-chip">${displayName(m)}</span>`).join('')
+    : '<div class="empty-state">아침 필요 인원이 없습니다</div>';
+}
+
+// Dashboard
+function renderDashboard() {
+  const attending = state.members.filter(m => m.attending);
+  const total = state.members.length;
+  const shortages = state.equipTypes.filter(e => calcOwned(e.id) < calcNeeded(e));
+
+  document.getElementById('stats-cards').innerHTML = `
+    <div class="card summary-stat">
+      <div class="number">${attending.length}</div>
+      <div class="label">참석 인원 (전체 ${total}명)</div>
+    </div>
+    <div class="card summary-stat">
+      <div class="number">${state.equipTypes.length}</div>
+      <div class="label">장비 종류</div>
+    </div>
+    <div class="card summary-stat">
+      <div class="number" style="color:${shortages.length ? 'var(--danger)' : 'var(--success)'}">
+        ${shortages.length}
+      </div>
+      <div class="label">부족 장비</div>
+    </div>
+  `;
+
+  document.getElementById('shortage-list').innerHTML = shortages.length
+    ? shortages.map(e => `
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee">
+          <span>${e.name}</span>
+          <span style="color:var(--danger); font-weight:600">
+            ${calcNeeded(e) - calcOwned(e.id)}개 부족 (필요 ${calcNeeded(e)} / 보유 ${calcOwned(e.id)})
+          </span>
+        </div>
+      `).join('')
+    : '<div style="color:var(--success); padding:16px; text-align:center">모든 장비 충분합니다!</div>';
+
+  document.getElementById('attending-quick').innerHTML = attending.length
+    ? attending.map(m => `
+        <span class="member-chip ${m.role === 'leader' ? 'leader' : ''}">
+          ${displayName(m)} ${m.gender === 'male' ? '(남)' : '(여)'}
+        </span>
+      `).join('')
+    : '<div class="empty-state">참석자가 없습니다. 회원을 추가해주세요.</div>';
+}
+
+function renderAll() {
+  renderDashboard();
+  renderMembers();
+  renderEquipment();
+  renderAssignments();
+  renderSchedule();
+}
+
+// Export / Import
+function exportData() {
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `camping-plan-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('데이터 내보내기 완료');
+}
+
+function importDataPrompt() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        state = JSON.parse(ev.target.result);
+        saveState();
+        renderAll();
+        showToast('데이터 불러오기 완료');
+      } catch { showToast('파일 형식 오류'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function printAssignment() {
+  const attending = state.members.filter(m => m.attending);
+  const leaders = attending.filter(m => m.role === 'leader');
+  const duty = state.assignments.equipDuty || {};
+
+  let html = `
+    <div style="font-family:sans-serif; padding:20px; max-width:800px; margin:auto">
+      <h1 style="text-align:center; margin-bottom:20px">Camping&Joy 배정표</h1>
+      <p style="text-align:center; color:#666">생성일: ${new Date().toLocaleDateString('ko-KR')} | 참석: ${attending.length}명</p>
+
+      <h2 style="margin-top:30px; border-bottom:2px solid #2d6a4f; padding-bottom:6px">
+        메인 타프 (운영진: ${leaders.map(m => displayName(m)).join(', ')})
+      </h2>
+      <table style="width:100%; border-collapse:collapse; margin:10px 0">
+        <tr>
+          ${state.assignments.tables.map((tIds, i) => {
+            const mems = tIds.map(id => state.members.find(m => m.id === id)).filter(Boolean);
+            return `<td style="width:33%; vertical-align:top; padding:10px; border:1px solid #ddd">
+              <strong>테이블 ${i + 1}</strong> (${mems.length}명)<br><br>
+              ${mems.map(m => displayName(m)).join('<br>')}
+            </td>`;
+          }).join('')}
+        </tr>
+      </table>
+
+      <h2 style="margin-top:24px; border-bottom:2px solid #2d6a4f; padding-bottom:6px">텐트 배정</h2>
+      <table style="width:100%; border-collapse:collapse; margin:10px 0">
+        <tr>
+          <td style="width:50%; vertical-align:top; padding:10px; border:1px solid #ddd">
+            <strong>남자 텐트</strong><br><br>
+            ${(state.assignments.tents?.male || []).map(id => {
+              const m = state.members.find(m => m.id === id);
+              return m ? displayName(m) : '';
+            }).filter(Boolean).join('<br>')}
+          </td>
+          <td style="width:50%; vertical-align:top; padding:10px; border:1px solid #ddd">
+            <strong>여자 텐트</strong><br><br>
+            ${(state.assignments.tents?.female || []).map(id => {
+              const m = state.members.find(m => m.id === id);
+              return m ? displayName(m) : '';
+            }).filter(Boolean).join('<br>')}
+          </td>
+        </tr>
+      </table>
+
+      <h2 style="margin-top:24px; border-bottom:2px solid #2d6a4f; padding-bottom:6px">장비 담당</h2>
+      <table style="width:100%; border-collapse:collapse; margin:10px 0">
+        ${state.equipTypes.filter(e => e.calc !== 'per1').map(e => {
+          const owners = (duty[e.id] || []).map(id => state.members.find(m => m.id === id)).filter(Boolean);
+          return `<tr>
+            <td style="padding:6px 10px; border:1px solid #ddd; font-weight:bold; width:120px">${e.name}</td>
+            <td style="padding:6px 10px; border:1px solid #ddd">${owners.map(m => displayName(m)).join(', ') || '-'}</td>
+          </tr>`;
+        }).join('')}
+      </table>
+
+      <h2 style="margin-top:24px; border-bottom:2px solid #2d6a4f; padding-bottom:6px">일정</h2>
+      ${state.schedule.map(s => `
+        <div style="padding:6px 0; border-bottom:1px solid #eee">
+          <strong>${s.time || ''} ${s.item}</strong>
+          ${s.menu ? ` — ${s.menu}` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById('printArea').innerHTML = html;
+  window.print();
+  setTimeout(() => { document.getElementById('printArea').innerHTML = ''; }, 1000);
+}
+
+// Init
+renderAll();
+</script>
+</body>
+</html>
