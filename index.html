@@ -213,8 +213,64 @@
 
   @media (max-width: 768px) {
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .form-row { flex-direction: column; }
-    nav button { padding: 12px 16px; font-size: 0.8rem; }
+    .form-row { flex-direction: column; align-items: stretch; }
+    .form-group { width: 100%; }
+    .form-group input, .form-group select { width: 100%; }
+
+    header { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
+    header h1 { font-size: 1.25rem; }
+    header .subtitle { font-size: 0.75rem; }
+    .header-actions { width: 100%; justify-content: space-between; }
+    .header-actions button { flex: 1; padding: 8px 6px; font-size: 0.78rem; }
+
+    nav { -webkit-overflow-scrolling: touch; }
+    nav button { padding: 11px 14px; font-size: 0.78rem; flex-shrink: 0; }
+
+    main { padding: 12px; }
+    .card { padding: 16px; margin-bottom: 14px; border-radius: 10px; }
+    .card h2 { font-size: 1.05rem; margin-bottom: 12px; }
+
+    .summary-stat { padding: 12px 8px; }
+    .summary-stat .number { font-size: 1.6rem; }
+    .summary-stat .label { font-size: 0.78rem; }
+
+    /* 테이블 → 모바일 카드 */
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; }
+    tr {
+      margin-bottom: 12px;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fafafa;
+    }
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.85rem;
+    }
+    td:last-child { border-bottom: none; }
+    td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: var(--primary-dark);
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      margin-right: 10px;
+    }
+
+    .equipment-tags { justify-content: flex-end; }
+    .member-chip { font-size: 0.78rem; padding: 3px 8px; }
+    .tarp-zone { padding: 12px; }
+    .drop-zone { min-height: 50px; padding: 8px; }
+    .auto-assign-btn { width: 100%; padding: 14px; font-size: 0.95rem; }
+    .meal-card { padding: 12px; }
+
+    .equip-checklist { grid-template-columns: 1fr; }
+    .modal { width: 95%; padding: 20px; }
   }
 
   .tarp-zone {
@@ -760,17 +816,17 @@ function renderMembers() {
   const tb = document.getElementById('memberTable');
   tb.innerHTML = state.members.map(m => `
     <tr>
-      <td><strong>${displayName(m)}</strong></td>
-      <td><span class="badge ${m.role === 'leader' ? 'badge-leader' : 'badge-member'}">
+      <td data-label="이름"><strong>${displayName(m)}</strong></td>
+      <td data-label="역할"><span class="badge ${m.role === 'leader' ? 'badge-leader' : 'badge-member'}">
         ${m.role === 'leader' ? '운영진' : '회원'}</span></td>
-      <td>${m.gender === 'male' ? '남' : '여'}</td>
-      <td>
+      <td data-label="성별">${m.gender === 'male' ? '남' : '여'}</td>
+      <td data-label="참석">
         <span class="badge ${m.attending ? 'badge-attending' : 'badge-absent'}"
               style="cursor:pointer" onclick="toggleAttending('${m.id}')">
           ${m.attending ? '참석' : '불참'}
         </span>
       </td>
-      <td>
+      <td data-label="보유 장비">
         <div class="equipment-tags">
           ${m.equipment.map(eId => {
             const et = state.equipTypes.find(e => e.id === eId);
@@ -779,11 +835,11 @@ function renderMembers() {
           <button class="btn btn-sm btn-outline" onclick="openEquipModal('${m.id}')">편집</button>
         </div>
       </td>
-      <td>
+      <td data-label="아침">
         <input type="checkbox" ${m.needBreakfast ? 'checked' : ''}
                onchange="toggleBreakfast('${m.id}')" style="width:18px;height:18px;accent-color:var(--primary)">
       </td>
-      <td>
+      <td data-label="">
         <button class="btn btn-sm btn-danger" onclick="removeMember('${m.id}')">삭제</button>
       </td>
     </tr>
@@ -835,18 +891,18 @@ function renderEquipment() {
     const calcLabel = { per1: '1인당 1개', per4: '4인당 1개', per6: '6인당 1개', fixed: `고정 ${e.fixed}개` };
     return `
       <tr>
-        <td><strong>${e.name}</strong><br><span style="font-size:0.75rem;color:#999">${calcLabel[e.calc]}</span></td>
-        <td>${needed}개</td>
-        <td>${owned}개</td>
-        <td style="color:${ok ? 'var(--success)' : 'var(--danger)'}; font-weight:600">
+        <td data-label="장비"><strong>${e.name}</strong><br><span style="font-size:0.75rem;color:#999">${calcLabel[e.calc]}</span></td>
+        <td data-label="필요">${needed}개</td>
+        <td data-label="보유">${owned}개</td>
+        <td data-label="상태" style="color:${ok ? 'var(--success)' : 'var(--danger)'}; font-weight:600">
           ${ok ? 'OK' : `${needed - owned}개 부족`}
         </td>
-        <td>
+        <td data-label="보유자">
           <div class="equipment-tags">
             ${owners.map(m => `<span class="equip-tag">${displayName(m)}</span>`).join('')}
           </div>
         </td>
-        <td><button class="btn btn-sm btn-danger" onclick="removeEquipType('${e.id}')">삭제</button></td>
+        <td data-label=""><button class="btn btn-sm btn-danger" onclick="removeEquipType('${e.id}')">삭제</button></td>
       </tr>
     `;
   }).join('');
