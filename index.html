@@ -616,19 +616,32 @@ function defaultState() {
   return {
     members: [],
     equipTypes: [
-      { id: 'tent', name: '텐트', calc: 'per4', fixed: 1 },
+      { id: 'caravan', name: '카라반', calc: 'fixed', fixed: 1 },
+      { id: 'bigtent', name: '대형텐트', calc: 'fixed', fixed: 2 },
+      { id: 'solotent', name: '1인텐트', calc: 'per4', fixed: 1 },
       { id: 'tarp', name: '타프', calc: 'fixed', fixed: 3 },
       { id: 'table', name: '테이블', calc: 'per4', fixed: 1 },
+      { id: 'chair', name: '1인 체어(의자)', calc: 'per1', fixed: 1 },
       { id: 'grill', name: '그리들', calc: 'per6', fixed: 1 },
       { id: 'burner', name: '강염버너', calc: 'per6', fixed: 1 },
-      { id: 'icebox', name: '아이스박스', calc: 'per6', fixed: 1 },
-      { id: 'lantern', name: '조명', calc: 'per1', fixed: 1 },
-      { id: 'scissors', name: '가위/집게', calc: 'per4', fixed: 1 },
-      { id: 'cuttingboard', name: '도마/칼', calc: 'per6', fixed: 1 },
+      { id: 'guibada', name: '구이바다', calc: 'fixed', fixed: 1 },
+      { id: 'alpicool', name: '알피쿨', calc: 'fixed', fixed: 1 },
+      { id: 'iceboxL', name: '아이스박스(대)', calc: 'per6', fixed: 1 },
+      { id: 'iceboxS', name: '아이스박스(중,소)', calc: 'per6', fixed: 1 },
+      { id: 'lanternL', name: '랜턴(대형)', calc: 'per6', fixed: 1 },
+      { id: 'lanternS', name: '랜턴(중,소)', calc: 'per1', fixed: 1 },
+      { id: 'scissors', name: '가위', calc: 'per4', fixed: 1 },
+      { id: 'tongs', name: '집게', calc: 'per4', fixed: 1 },
+      { id: 'knife', name: '칼', calc: 'per6', fixed: 1 },
+      { id: 'cuttingboard', name: '도마', calc: 'per6', fixed: 1 },
+      { id: 'pot', name: '냄비', calc: 'per6', fixed: 1 },
       { id: 'bigpot', name: '대형냄비', calc: 'fixed', fixed: 2 },
-      { id: 'reel', name: '릴선', calc: 'per6', fixed: 1 },
-      { id: 'chair', name: '의자', calc: 'per1', fixed: 1 },
-      { id: 'sleeping', name: '침낭/매트', calc: 'per1', fixed: 1 },
+      { id: 'reel', name: '일반릴선', calc: 'per6', fixed: 1 },
+      { id: 'barrel', name: '통', calc: 'fixed', fixed: 2 },
+      { id: 'lanternoil', name: '등유', calc: 'fixed', fixed: 1 },
+      { id: 'heater', name: '난로', calc: 'fixed', fixed: 2 },
+      { id: 'sleeping', name: '침낭', calc: 'per1', fixed: 1 },
+      { id: 'blanket', name: '이불', calc: 'per1', fixed: 1 },
     ],
     assignments: { tables: [[], [], []], tents: { male: [], female: [] }, equipDuty: {} },
     schedule: [
@@ -1249,7 +1262,24 @@ function uploadExcelPrompt() {
       try {
         const wb = XLSX.read(ev.target.result, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        const allRows = XLSX.utils.sheet_to_json(ws, { defval: '', header: 1 });
+
+        let headerIdx = 0;
+        for (let i = 0; i < Math.min(allRows.length, 5); i++) {
+          const row = allRows[i].map(c => c.toString().trim());
+          if (row.includes('이름') && row.some(c => c.includes('성별'))) { headerIdx = i; break; }
+        }
+
+        const headers = allRows[headerIdx].map(c => c.toString().trim());
+        const dataRows = allRows.slice(headerIdx + 1);
+        const data = dataRows
+          .filter(r => r.some(c => c !== ''))
+          .map(r => {
+            const obj = {};
+            headers.forEach((h, i) => { if (h) obj[h] = (r[i] !== undefined ? r[i] : ''); });
+            return obj;
+          });
+
         importFromExcel(data);
       } catch (err) {
         showToast('엑셀 파일 읽기 실패: ' + err.message);
@@ -1263,25 +1293,49 @@ function uploadExcelPrompt() {
 function importFromExcel(rows) {
   if (!rows || rows.length === 0) { showToast('데이터가 없습니다'); return; }
 
-  const equipNames = state.equipTypes.map(e => e.name);
+  const firstRow = rows[0];
+  const keys = Object.keys(firstRow);
+  const isGoogleSheet = keys.some(k => k.includes('이름')) && keys.some(k => k.includes('성별'));
+
   let added = 0, updated = 0;
 
   rows.forEach(row => {
-    const name = (row['이름'] || '').toString().trim();
+    const findCol = (patterns) => {
+      for (const p of patterns) {
+        const key = keys.find(k => k.includes(p));
+        if (key && row[key] !== undefined) return row[key].toString().trim();
+      }
+      return '';
+    };
+
+    const name = findCol(['이름']);
     if (!name) return;
 
-    const tag = (row['구분(동명이인)'] || '').toString().trim();
-    const genderRaw = (row['성별(남/여)'] || '').toString().trim();
-    const gender = genderRaw === '여' ? 'female' : 'male';
-    const roleRaw = (row['역할(회원/운영진)'] || '').toString().trim();
-    const role = roleRaw === '운영진' ? 'leader' : 'member';
-    const attending = (row['참석(O/X)'] || '').toString().trim().toUpperCase() === 'O';
-    const needBreakfast = (row['아침필요(O/X)'] || '').toString().trim().toUpperCase() === 'O';
+    const genderRaw = findCol(['성별']);
+    const gender = (genderRaw.includes('여')) ? 'female' : 'male';
+
+    const roleRaw = findCol(['역할', '회원/운영진']);
+    const role = roleRaw.includes('운영진') ? 'leader' : 'member';
+
+    const tag = findCol(['구분', '동명이인']);
+
+    const attendRaw = findCol(['참석']);
+    const attending = attendRaw === '' || attendRaw.toUpperCase() === 'O' || attendRaw === '참석';
+
+    const bfRaw = findCol(['아침']);
+    const needBreakfast = bfRaw.toUpperCase() === 'O';
 
     const equipment = [];
     state.equipTypes.forEach(e => {
-      const val = (row[e.name] || '').toString().trim().toUpperCase();
-      if (val === 'O') equipment.push(e.id);
+      const matchKey = keys.find(k => {
+        const kClean = k.replace(/\s/g, '');
+        const eClean = e.name.replace(/\s/g, '');
+        return kClean === eClean || kClean.includes(eClean) || eClean.includes(kClean);
+      });
+      if (matchKey) {
+        const val = (row[matchKey] || '').toString().trim().toUpperCase();
+        if (val && val !== 'X' && val !== '0') equipment.push(e.id);
+      }
     });
 
     const existing = state.members.find(m => m.name === name && m.tag === tag);
