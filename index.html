@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Camping&Joy</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
   :root {
     --primary: #2d6a4f;
@@ -425,6 +426,17 @@
 
   <!-- 회원 관리 -->
   <div id="tab-members" class="tab-content">
+    <div class="card" style="background: linear-gradient(135deg, #e8f5e9, #fff); border: 1px solid #c8e6c9;">
+      <h2>엑셀로 회원 일괄 등록</h2>
+      <p style="font-size:0.85rem; color:var(--text-light); margin-bottom:14px">
+        1. 템플릿 다운로드 → 2. 회원들이 본인 행에 O 체크 → 3. 완성된 파일 업로드
+      </p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap">
+        <button class="btn btn-success" onclick="downloadExcelTemplate()">엑셀 템플릿 다운로드</button>
+        <button class="btn btn-info" onclick="uploadExcelPrompt()">엑셀 업로드 (자동 등록)</button>
+      </div>
+    </div>
+
     <div class="card">
       <h2>회원 목록</h2>
       <div class="form-row">
@@ -1167,6 +1179,131 @@ function printAssignment() {
   document.getElementById('printArea').innerHTML = html;
   window.print();
   setTimeout(() => { document.getElementById('printArea').innerHTML = ''; }, 1000);
+}
+
+// Excel Template Download
+function downloadExcelTemplate() {
+  const equipNames = state.equipTypes.map(e => e.name);
+  const headers = ['이름', '구분(동명이인)', '성별(남/여)', '역할(회원/운영진)', '참석(O/X)', '아침필요(O/X)', ...equipNames];
+
+  const exampleRows = [
+    ['홍길동', '', '남', '회원', 'O', 'X', ...equipNames.map(() => '')],
+    ['김영희', '김', '여', '운영진', 'O', 'O', ...equipNames.map((_, i) => i < 3 ? 'O' : '')],
+  ];
+
+  const existingRows = state.members.map(m => [
+    m.name,
+    m.tag || '',
+    m.gender === 'male' ? '남' : '여',
+    m.role === 'leader' ? '운영진' : '회원',
+    m.attending ? 'O' : 'X',
+    m.needBreakfast ? 'O' : 'X',
+    ...state.equipTypes.map(e => m.equipment.includes(e.id) ? 'O' : '')
+  ]);
+
+  const rows = existingRows.length > 0 ? existingRows : exampleRows;
+  const wsData = [headers, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  const colWidths = headers.map((h, i) => {
+    if (i <= 1) return { wch: 12 };
+    if (i <= 5) return { wch: 16 };
+    return { wch: 14 };
+  });
+  ws['!cols'] = colWidths;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '회원정보');
+
+  const guideData = [
+    ['Camping&Joy 엑셀 템플릿 사용법'],
+    [''],
+    ['1. "회원정보" 시트에 본인 정보를 입력하세요'],
+    ['2. 이름은 필수입니다'],
+    ['3. 동명이인이 있으면 "구분" 칸에 성 또는 별명을 적어주세요'],
+    ['4. 성별: 남 또는 여'],
+    ['5. 역할: 회원 또는 운영진'],
+    ['6. 참석, 아침필요: O(참) 또는 X(불참), 빈칸은 X로 처리'],
+    ['7. 장비 칸: 해당 장비를 보유하고 있으면 O, 없으면 빈칸'],
+    [''],
+    ['작성 완료 후 운영진에게 파일을 보내주세요!'],
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(guideData);
+  ws2['!cols'] = [{ wch: 60 }];
+  XLSX.utils.book_append_sheet(wb, ws2, '작성방법');
+
+  XLSX.writeFile(wb, `CampingJoy_회원등록_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  showToast('엑셀 템플릿 다운로드 완료');
+}
+
+// Excel Upload
+function uploadExcelPrompt() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.xlsx,.xls';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const wb = XLSX.read(ev.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        importFromExcel(data);
+      } catch (err) {
+        showToast('엑셀 파일 읽기 실패: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  input.click();
+}
+
+function importFromExcel(rows) {
+  if (!rows || rows.length === 0) { showToast('데이터가 없습니다'); return; }
+
+  const equipNames = state.equipTypes.map(e => e.name);
+  let added = 0, updated = 0;
+
+  rows.forEach(row => {
+    const name = (row['이름'] || '').toString().trim();
+    if (!name) return;
+
+    const tag = (row['구분(동명이인)'] || '').toString().trim();
+    const genderRaw = (row['성별(남/여)'] || '').toString().trim();
+    const gender = genderRaw === '여' ? 'female' : 'male';
+    const roleRaw = (row['역할(회원/운영진)'] || '').toString().trim();
+    const role = roleRaw === '운영진' ? 'leader' : 'member';
+    const attending = (row['참석(O/X)'] || '').toString().trim().toUpperCase() === 'O';
+    const needBreakfast = (row['아침필요(O/X)'] || '').toString().trim().toUpperCase() === 'O';
+
+    const equipment = [];
+    state.equipTypes.forEach(e => {
+      const val = (row[e.name] || '').toString().trim().toUpperCase();
+      if (val === 'O') equipment.push(e.id);
+    });
+
+    const existing = state.members.find(m => m.name === name && m.tag === tag);
+    if (existing) {
+      existing.gender = gender;
+      existing.role = role;
+      existing.attending = attending;
+      existing.needBreakfast = needBreakfast;
+      existing.equipment = equipment;
+      updated++;
+    } else {
+      state.members.push({
+        id: genId(), name, tag, role, gender,
+        attending, equipment, needBreakfast
+      });
+      added++;
+    }
+  });
+
+  saveState();
+  renderAll();
+  showToast(`완료! 신규 ${added}명, 업데이트 ${updated}명`);
 }
 
 // Init
