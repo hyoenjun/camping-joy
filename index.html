@@ -370,7 +370,18 @@ let firebaseRef = null;
 
 function defaultState() {
   return {
-    members: [],
+    members: [
+      {id:'t1',name:'김철수',gender:'male',role:'leader',phone:'010-1234-5678',attending:true,needBreakfast:true,equipment:['caravan','bigtent','tarp','burner','alpicool','lanternL'],equipmentQty:{caravan:1,bigtent:2,tarp:1,burner:1,alpicool:1,lanternL:1}},
+      {id:'t2',name:'이영희',gender:'female',role:'leader',phone:'010-2345-6789',attending:true,needBreakfast:true,equipment:['table','chair','grill','scissors','tongs','pot'],equipmentQty:{table:1,chair:2,grill:1,scissors:1,tongs:1,pot:1}},
+      {id:'t3',name:'박지훈',gender:'male',role:'member',phone:'010-3456-7890',attending:true,needBreakfast:false,equipment:['bigtent','tarp','guibada','iceboxL','reel','heater'],equipmentQty:{bigtent:1,tarp:1,guibada:1,iceboxL:1,reel:1,heater:1}},
+      {id:'t4',name:'최수진',gender:'female',role:'member',phone:'010-4567-8901',attending:true,needBreakfast:true,equipment:['solotent','chair','lanternS','knife','cuttingboard','blanket'],equipmentQty:{solotent:1,chair:1,lanternS:1,knife:1,cuttingboard:1,blanket:2}},
+      {id:'t5',name:'정민호',gender:'male',role:'member',phone:'010-5678-9012',attending:true,needBreakfast:true,equipment:['table','bigpot','barrel','lanternoil','sleeping'],equipmentQty:{table:2,bigpot:1,barrel:1,lanternoil:1,sleeping:1}},
+      {id:'t6',name:'한소영',gender:'female',role:'member',phone:'010-6789-0123',attending:true,needBreakfast:false,equipment:['chair','iceboxS','lanternS','pot','blanket'],equipmentQty:{chair:1,iceboxS:1,lanternS:1,pot:1,blanket:1}},
+      {id:'t7',name:'오태윤',gender:'male',role:'member',phone:'010-7890-1234',attending:true,needBreakfast:true,equipment:['tarp','grill','burner','heater','sleeping'],equipmentQty:{tarp:1,grill:1,burner:1,heater:1,sleeping:1}},
+      {id:'t8',name:'윤서연',gender:'female',role:'member',phone:'010-8901-2345',attending:false,needBreakfast:false,equipment:['solotent','chair','lanternS','blanket'],equipmentQty:{solotent:1,chair:1,lanternS:1,blanket:1}},
+      {id:'t9',name:'장동혁',gender:'male',role:'member',phone:'010-9012-3456',attending:true,needBreakfast:true,equipment:['caravan','bigpot','barrel','reel','sleeping'],equipmentQty:{caravan:1,bigpot:1,barrel:1,reel:1,sleeping:1}},
+      {id:'t10',name:'송미래',gender:'female',role:'member',phone:'010-0123-4567',attending:true,needBreakfast:true,equipment:['iceboxS','lanternS','scissors','tongs','knife','cuttingboard'],equipmentQty:{iceboxS:1,lanternS:1,scissors:1,tongs:1,knife:1,cuttingboard:1}},
+    ],
     equipTypes: [
       {id:'caravan',name:'카라반',calc:'fixed',fixed:1},{id:'bigtent',name:'대형텐트',calc:'fixed',fixed:2},
       {id:'solotent',name:'1인텐트',calc:'per4',fixed:1},{id:'tarp',name:'타프',calc:'fixed',fixed:3},
@@ -399,7 +410,7 @@ function defaultState() {
   };
 }
 
-function loadState() { try { const d=localStorage.getItem(STORAGE_KEY); return d?JSON.parse(d):defaultState(); } catch{return defaultState();} }
+function loadState() { try { const d=localStorage.getItem(STORAGE_KEY); if(!d) return defaultState(); const s=JSON.parse(d); const def=defaultState(); Object.keys(def).forEach(k=>{if(!(k in s))s[k]=def[k];}); return s; } catch{return defaultState();} }
 function saveState() { localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); if(firebaseRef) firebaseRef.set(state); }
 function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 function genId() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
